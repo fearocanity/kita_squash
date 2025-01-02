@@ -23,7 +23,7 @@ comp_1="$(printf "%.0f" "$(bc -l <<< "((image_height - 10) / days_num) * (days_n
 
 convert kita.png -resize "100%x${comp_1}!" kita_sqw.png
 message_post="$(cat <<-EOF
-${days_left} Days until this kita would be squashed.
+${days_left} days until this kita is squashed.
 EOF
 )"
 echo "$((days_left-1))" > ./days.txt
