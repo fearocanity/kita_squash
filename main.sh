@@ -21,11 +21,10 @@ fb_token="${1}"
 image_height="$(identify -format "%h" "kita.png")"
 comp_1="$(printf "%.0f" "$(bc -l <<< "((${image_height} - 10) / ${days_num}) * ${days_left}")")"
 
-identify -list resource
 convert kita.png -resize "x${comp_1}!" kita_sqw.png
 message_post="$(cat <<-EOF
 ${days_left} days until this kita is squashed.
 EOF
 )"
 echo "$((days_left-1))" > ./days.txt
-post_fp "kita_sqw.png" "${message_post}" || exit 0
+post_fp "kita_sqw.png" "${message_post}" &>/dev/null || exit 0
