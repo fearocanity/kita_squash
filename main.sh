@@ -26,5 +26,5 @@ message_post="$(cat <<-EOF
 ${days_left} Days until this kita would be squashed.
 EOF
 )"
-
+echo "$((days_left-1))" > ./days.txt
 post_fp "kita_sqw.png" "${message_post}" || exit 0
