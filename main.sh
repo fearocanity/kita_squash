@@ -19,7 +19,7 @@ post_fp(){
 
 fb_token="${1}"
 image_height="$(identify -format "%h" "kita.png")"
-comp_1="$(printf "%.0f" "$(bc -l <<< "((${image_height} - 10) / ${days_num}) * (${days_num} - ${days_left})")")"
+comp_1="$(printf "%.0f" "$(bc -l <<< "((${image_height} - 10) / ${days_num}) * ${days_left}")")"
 
 convert kita.png -resize "100%x${comp_1}!" kita_sqw.png
 message_post="$(cat <<-EOF
