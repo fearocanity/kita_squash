@@ -47,7 +47,7 @@ jobs:
         if: ${{ steps.check_latest.outputs.skip == 'false' }}
         continue-on-error: true
         run: |
-          bash -x main.sh "${{ secrets.FB_TOK }}"
+          bash main.sh "${{ secrets.FB_TOK }}"
         
       - name: update
         uses: stefanzweifel/git-auto-commit-action@v4
