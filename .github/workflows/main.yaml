@@ -1,0 +1,60 @@
+name: "update status"
+on:
+   workflow_dispatch:
+   schedule:
+     - cron: "0 0 * * *"
+
+permissions:
+   contents: write
+
+jobs:
+ inits:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: "checker"
+        env:
+          trig_actor: ${{ github.triggering_actor }}
+          repo_ownr: ${{ github.repository_owner }}
+        run: |
+          [[ "${trig_actor}" == "${repo_ownr}" ]] && echo "EQUAL"
+          case "${trig_actor}" in
+            "${repo_ownr}"|github-actions*) : ;;
+            *) echo "Due to restriction, the run was blocked (${trig_actor})... exiting." >&2 ; exit 1 ;;
+          esac
+         
+      - name: "check_latest"
+        id: check_latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_COMMIT="$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.ref }}" | jq -r .sha)"
+          if [[ "${LATEST_COMMIT}" != "${GITHUB_SHA}" ]]; then
+            echo "Current commit is not the latest" >&2
+            curl -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" -X POST -d '{"ref":"'"${{ github.ref }}"'","inputs":{}}' "https://api.github.com/repos/${{ github.repository }}/actions/workflows/auto.yaml/dispatches"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: dldeps
+        run: |
+          (echo "set man-db/auto-update false" | sudo debconf-communicate; sudo dpkg-reconfigure man-db) &>/dev/null
+          sudo apt-get install imagemagick bc -y &>/dev/null
+
+      - name: execute
+        if: ${{ steps.check_latest.outputs.skip == 'false' }}
+        continue-on-error: true
+        run: |
+          bash main.sh "${{ secrets.FB_TOK }}"
+        
+      - name: update
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "updated"
+          repository: .
+          file_pattern: days.txt
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
