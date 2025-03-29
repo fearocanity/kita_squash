@@ -41,7 +41,7 @@ jobs:
       - name: dldeps
         run: |
           (echo "set man-db/auto-update false" | sudo debconf-communicate; sudo dpkg-reconfigure man-db) &>/dev/null
-          sudo apt-get install imagemagick bc -y &>/dev/null
+          sudo apt install imagemagick bc -y &>/dev/null
 
       - name: execute
         if: ${{ steps.check_latest.outputs.skip == 'false' }}
